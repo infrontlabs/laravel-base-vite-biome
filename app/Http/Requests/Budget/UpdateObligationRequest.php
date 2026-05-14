@@ -23,6 +23,8 @@ class UpdateObligationRequest extends FormRequest
             'day_of_week' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:6'],
             'end_date' => ['sometimes', 'nullable', 'date'],
             'autopay' => ['sometimes', 'boolean'],
+            'cancel_url' => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
+            'last_reviewed_at' => ['sometimes', 'nullable', 'date'],
             'is_active' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string'],
         ];

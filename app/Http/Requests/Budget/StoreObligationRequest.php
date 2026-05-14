@@ -23,6 +23,8 @@ class StoreObligationRequest extends FormRequest
             'day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'end_date' => ['nullable', 'date', 'after_or_equal:anchor_date'],
             'autopay' => ['boolean'],
+            'cancel_url' => ['nullable', 'string', 'url', 'max:2048'],
+            'last_reviewed_at' => ['nullable', 'date'],
             'is_active' => ['boolean'],
             'notes' => ['nullable', 'string'],
         ];

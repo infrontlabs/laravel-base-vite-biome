@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'amount_cents', 'currency',
     'frequency', 'interval', 'anchor_date',
     'day_of_month', 'secondary_day_of_month', 'day_of_week',
-    'end_date', 'autopay', 'is_active',
+    'end_date', 'autopay', 'cancel_url', 'last_reviewed_at', 'is_active',
     'last_materialized_through', 'notes',
 ])]
 class ScheduledObligation extends Model
@@ -31,6 +31,7 @@ class ScheduledObligation extends Model
             'day_of_week' => 'integer',
             'end_date' => 'date',
             'autopay' => 'boolean',
+            'last_reviewed_at' => 'date',
             'is_active' => 'boolean',
             'last_materialized_through' => 'date',
         ];

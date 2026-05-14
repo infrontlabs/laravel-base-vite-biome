@@ -94,8 +94,16 @@ export type ObligationRow = {
     anchor_date: string;
     is_active: boolean;
     autopay: boolean;
+    cancel_url: string | null;
+    last_reviewed_at: string | null;
     account_name: string | null;
     category_name: string | null;
+};
+
+export type SubscriptionRollup = {
+    monthly_cents: number;
+    annual_cents: number;
+    count: number;
 };
 
 export type ObligationInstanceRow = {

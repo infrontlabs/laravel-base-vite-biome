@@ -17,6 +17,20 @@ use Inertia\Response;
 
 class ObligationsController extends Controller
 {
+    /**
+     * Multipliers to normalize a single occurrence amount into a monthly equivalent.
+     * weekly: 52/12, biweekly: 26/12, semimonthly: 2, monthly: 1, quarterly: 1/3, annual: 1/12, custom: 1.
+     */
+    private const MONTHLY_MULTIPLIERS = [
+        'weekly' => 52 / 12,
+        'biweekly' => 26 / 12,
+        'semimonthly' => 2.0,
+        'monthly' => 1.0,
+        'quarterly' => 1 / 3,
+        'annual' => 1 / 12,
+        'custom' => 1.0,
+    ];
+
     public function index(ObligationMaterializer $materializer): Response
     {
         $materializer->run();
@@ -38,6 +52,8 @@ class ObligationsController extends Controller
                 'anchor_date' => $o->anchor_date->toDateString(),
                 'is_active' => $o->is_active,
                 'autopay' => $o->autopay,
+                'cancel_url' => $o->cancel_url,
+                'last_reviewed_at' => $o->last_reviewed_at?->toDateString(),
                 'account_name' => $o->account?->name,
                 'category_name' => $o->category?->name,
             ]);
@@ -65,6 +81,7 @@ class ObligationsController extends Controller
         return Inertia::render('obligations/index', [
             'obligations' => $obligations,
             'upcoming' => $upcoming,
+            'subscriptionRollup' => $this->subscriptionRollup(),
         ]);
     }
 
@@ -97,13 +114,15 @@ class ObligationsController extends Controller
             'day_of_week' => $data['day_of_week'] ?? null,
             'end_date' => $data['end_date'] ?? null,
             'autopay' => $data['autopay'] ?? false,
+            'cancel_url' => $data['cancel_url'] ?? null,
+            'last_reviewed_at' => $data['last_reviewed_at'] ?? null,
             'is_active' => $data['is_active'] ?? true,
             'notes' => $data['notes'] ?? null,
         ]);
 
         $materializer->run();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Obligation added.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Recurring item added.']);
 
         return to_route('obligations.index');
     }
@@ -127,6 +146,8 @@ class ObligationsController extends Controller
                 'day_of_week' => $obligation->day_of_week,
                 'end_date' => $obligation->end_date?->toDateString(),
                 'autopay' => $obligation->autopay,
+                'cancel_url' => $obligation->cancel_url,
+                'last_reviewed_at' => $obligation->last_reviewed_at?->toDateString(),
                 'is_active' => $obligation->is_active,
                 'notes' => $obligation->notes,
             ],
@@ -149,7 +170,7 @@ class ObligationsController extends Controller
         $obligation->fill($payload)->save();
         $materializer->run();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Obligation updated.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Recurring item updated.']);
 
         return to_route('obligations.index');
     }
@@ -158,9 +179,36 @@ class ObligationsController extends Controller
     {
         $obligation->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Obligation deleted.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Recurring item deleted.']);
 
         return to_route('obligations.index');
+    }
+
+    /**
+     * @return array{monthly_cents:int, annual_cents:int, count:int}
+     */
+    private function subscriptionRollup(): array
+    {
+        $subscriptions = ScheduledObligation::query()
+            ->where('kind', 'subscription')
+            ->where('is_active', true)
+            ->where('direction', 'outflow')
+            ->get(['amount_cents', 'frequency', 'interval']);
+
+        $monthlyCents = 0.0;
+        foreach ($subscriptions as $sub) {
+            $multiplier = self::MONTHLY_MULTIPLIERS[$sub->frequency] ?? 1.0;
+            $interval = max(1, (int) $sub->interval);
+            $monthlyCents += ($sub->amount_cents * $multiplier) / $interval;
+        }
+
+        $monthlyCents = (int) round($monthlyCents);
+
+        return [
+            'monthly_cents' => $monthlyCents,
+            'annual_cents' => $monthlyCents * 12,
+            'count' => $subscriptions->count(),
+        ];
     }
 
     private function accountOptions(): array

@@ -57,6 +57,8 @@ export default function CreateObligation({
         secondary_day_of_month: number | null;
         day_of_week: number | null;
         autopay: boolean;
+        cancel_url: string;
+        last_reviewed_at: string;
         is_active: boolean;
         notes: string;
     }>({
@@ -73,6 +75,8 @@ export default function CreateObligation({
         secondary_day_of_month: null,
         day_of_week: null,
         autopay: false,
+        cancel_url: '',
+        last_reviewed_at: '',
         is_active: true,
         notes: '',
     });
@@ -91,7 +95,7 @@ export default function CreateObligation({
         return (
             <div className="mx-auto max-w-xl p-4">
                 <p>
-                    Add an account first before scheduling obligations.{' '}
+                    Add an account first before scheduling recurring items.{' '}
                     <a className="underline" href="/accounts/create">
                         Add account
                     </a>
@@ -102,10 +106,10 @@ export default function CreateObligation({
 
     return (
         <>
-            <Head title="Add obligation" />
+            <Head title="Add recurring" />
             <div className="mx-auto max-w-2xl space-y-6 p-4">
                 <Heading
-                    title="Add scheduled obligation"
+                    title="Add recurring item"
                     description="Bills, subscriptions, paychecks, planned transfers."
                 />
 
@@ -257,6 +261,44 @@ export default function CreateObligation({
                         </Label>
                     </div>
 
+                    {data.kind === 'subscription' && (
+                        <div className="grid gap-4 rounded-md border border-dashed p-4 sm:grid-cols-2">
+                            <div className="grid gap-2 sm:col-span-2">
+                                <Label htmlFor="cancel_url">Cancel URL</Label>
+                                <Input
+                                    id="cancel_url"
+                                    type="url"
+                                    placeholder="https://account.example.com/cancel"
+                                    value={data.cancel_url}
+                                    onChange={(e) =>
+                                        setData('cancel_url', e.target.value)
+                                    }
+                                />
+                                <p className="text-muted-foreground text-xs">
+                                    Where to go to cancel this subscription.
+                                </p>
+                                <InputError message={errors.cancel_url} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_reviewed_at">
+                                    Last reviewed
+                                </Label>
+                                <Input
+                                    id="last_reviewed_at"
+                                    type="date"
+                                    value={data.last_reviewed_at}
+                                    onChange={(e) =>
+                                        setData(
+                                            'last_reviewed_at',
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.last_reviewed_at} />
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid gap-2">
                         <Label htmlFor="notes">Notes</Label>
                         <Input
@@ -269,7 +311,7 @@ export default function CreateObligation({
 
                     <div className="flex items-center gap-3">
                         <Button type="submit" disabled={processing}>
-                            Create obligation
+                            Add
                         </Button>
                     </div>
                 </form>
@@ -281,7 +323,7 @@ export default function CreateObligation({
 CreateObligation.layout = {
     breadcrumbs: [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Obligations', href: '/obligations' },
+        { title: 'Recurring', href: '/obligations' },
         { title: 'Add', href: '/obligations/create' },
     ],
 };

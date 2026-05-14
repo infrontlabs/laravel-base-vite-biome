@@ -41,6 +41,8 @@ type ObligationData = {
     day_of_week: number | null;
     end_date: string | null;
     autopay: boolean;
+    cancel_url: string | null;
+    last_reviewed_at: string | null;
     is_active: boolean;
     notes: string | null;
 };
@@ -80,6 +82,8 @@ export default function EditObligation({
         secondary_day_of_month: obligation.secondary_day_of_month,
         day_of_week: obligation.day_of_week,
         autopay: obligation.autopay,
+        cancel_url: obligation.cancel_url ?? '',
+        last_reviewed_at: obligation.last_reviewed_at ?? '',
         is_active: obligation.is_active,
         notes: obligation.notes ?? '',
     });
@@ -262,6 +266,44 @@ export default function EditObligation({
                         </div>
                     </div>
 
+                    {data.kind === 'subscription' && (
+                        <div className="grid gap-4 rounded-md border border-dashed p-4 sm:grid-cols-2">
+                            <div className="grid gap-2 sm:col-span-2">
+                                <Label htmlFor="cancel_url">Cancel URL</Label>
+                                <Input
+                                    id="cancel_url"
+                                    type="url"
+                                    placeholder="https://account.example.com/cancel"
+                                    value={data.cancel_url}
+                                    onChange={(e) =>
+                                        setData('cancel_url', e.target.value)
+                                    }
+                                />
+                                <p className="text-muted-foreground text-xs">
+                                    Where to go to cancel this subscription.
+                                </p>
+                                <InputError message={errors.cancel_url} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_reviewed_at">
+                                    Last reviewed
+                                </Label>
+                                <Input
+                                    id="last_reviewed_at"
+                                    type="date"
+                                    value={data.last_reviewed_at}
+                                    onChange={(e) =>
+                                        setData(
+                                            'last_reviewed_at',
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={errors.last_reviewed_at} />
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid gap-2">
                         <Label htmlFor="notes">Notes</Label>
                         <Input
@@ -297,7 +339,7 @@ export default function EditObligation({
 EditObligation.layout = {
     breadcrumbs: [
         { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Obligations', href: '/obligations' },
+        { title: 'Recurring', href: '/obligations' },
         { title: 'Edit', href: '#' },
     ],
 };

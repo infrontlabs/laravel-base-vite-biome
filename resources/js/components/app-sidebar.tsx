@@ -41,7 +41,7 @@ const mainNavItems: NavItem[] = [
         icon: Wallet,
     },
     {
-        title: 'Obligations',
+        title: 'Recurring',
         href: '/obligations',
         icon: CalendarClock,
     },
