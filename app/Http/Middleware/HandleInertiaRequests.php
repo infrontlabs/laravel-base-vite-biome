@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\UserPreference;
+use App\Services\Budget\SafeToSpendCalculator;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +44,21 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'budget' => fn () => $request->user() ? $this->budgetProps() : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function budgetProps(): array
+    {
+        return [
+            'buffer_threshold_cents' => (int) UserPreference::get(
+                'buffer_threshold_cents',
+                SafeToSpendCalculator::DEFAULT_BUFFER_CENTS,
+            ),
+            'default_currency' => (string) UserPreference::get('default_currency', 'USD'),
         ];
     }
 }
