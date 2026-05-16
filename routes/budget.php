@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ObligationInstanceController;
 use App\Http\Controllers\ObligationsController;
 use App\Http\Controllers\Settings\BudgetSettingsController;
+use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TransactionsController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('obligation-instances.skip');
     Route::post('obligation-instances/{instance}/match', [ObligationInstanceController::class, 'match'])
         ->name('obligation-instances.match');
+
+    Route::get('sync', [SyncController::class, 'index'])->name('sync.index');
+    Route::post('sync/simulate', [SyncController::class, 'simulate'])->name('sync.simulate');
+    Route::post('sync/{candidate}/match', [SyncController::class, 'match'])->name('sync.match');
+    Route::post('sync/{candidate}/accept', [SyncController::class, 'accept'])->name('sync.accept');
+    Route::delete('sync/{candidate}', [SyncController::class, 'reject'])->name('sync.reject');
 
     Route::get('categories', [CategoriesController::class, 'index'])->name('categories.index');
     Route::get('categories/{category}', [CategoriesController::class, 'show'])->name('categories.show');

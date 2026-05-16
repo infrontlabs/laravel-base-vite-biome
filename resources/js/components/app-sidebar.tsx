@@ -5,6 +5,7 @@ import {
     CircleDollarSign,
     FolderGit2,
     LayoutGrid,
+    RefreshCw,
     Tags,
     Wallet,
 } from 'lucide-react';
@@ -34,6 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Transactions',
         href: '/transactions',
         icon: CircleDollarSign,
+    },
+    {
+        title: 'Sync',
+        href: '/sync',
+        icon: RefreshCw,
     },
     {
         title: 'Accounts',
